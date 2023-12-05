@@ -1,9 +1,7 @@
 const helpers = require('../helpers/helperFunctions');
 
 const almanac = helpers.loadData(__dirname.split('/').pop(), false)
-// console.log(almanac)
 const seeds = almanac[0].match(/[0-9]+/g).map(seed => parseInt(seed))
-// console.log(seeds)
 
 const maps = []
 let map
@@ -22,8 +20,6 @@ for (let i = 2; i <= almanac.length; i++) {
     continue
   }
 }
-
-// console.log(maps)
 
 function process(value, mapIndex) {
   let newValue = value
