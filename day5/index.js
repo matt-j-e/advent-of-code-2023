@@ -6,17 +6,14 @@ const seeds = almanac[0].match(/[0-9]+/g).map(seed => parseInt(seed))
 // console.log(seeds)
 
 const maps = []
-let mapping = false
 let map
 for (let i = 2; i <= almanac.length; i++) {
   if (i === almanac.length || almanac[i] === '') {
     map.sort((a, b) => a[1] - b[1] > 0 ? 1 : -1)
     maps.push(map)
-    mapping = false
     continue
   }
   if (almanac[i][0].match(/[a-z]/)) {
-    mapping = true
     map = []
     continue
   }
