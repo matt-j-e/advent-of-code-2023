@@ -41,12 +41,13 @@ function process(value, mapIndex) {
 const locations = seeds.map(seed => process(seed, 0))
 console.log('Part One:', Math.min(...locations)) // 382895070
 
-const partTwoLocations = []
+let minLocation = Number.POSITIVE_INFINITY
 let s = 0
 while (s < seeds.length) {
   for (let i = seeds[s]; i < (seeds[s] + seeds[s + 1]); i++) {
-    partTwoLocations.push(process(i, 0))
+    const location = process(i, 0)
+    if (location < minLocation) minLocation = location
   }
   s += 2
 }
-console.log('Part Two:', Math.min(...partTwoLocations))
+console.log('Part Two:', minLocation) // 17729182 took ~ 5 mins to work through
