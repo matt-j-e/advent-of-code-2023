@@ -7,7 +7,6 @@ const hands = lines.map(line => {
   obj.bid = line.split(' ')[1]
   return obj
 })
-// console.log(hands)
 
 function isFive(cards) {
   return cards.every(card => card === cards[0])
@@ -63,32 +62,85 @@ function strength(hand) {
   return 1
 }
 
-function addStrength() {
-  hands.map(hand => hand.strength = strength(hand.cards))
+function mostFrequentNonJ(hand) {
+  const frequency = hand.split('').reduce((freqObj, card) => {
+    if (Object.keys(freqObj).includes(card)) {
+      freqObj[card]++
+    } else {
+      freqObj[card] = 1
+    }
+    return freqObj
+  }, {})
+  frequency['J'] = 0
+  const most = {card: 0, count:0}
+  Object.entries(frequency).forEach(([k, v]) => {
+    if (v > most.count) {
+      most.card = k
+      most.count = v
+    }
+  })
+  return most.card
 }
 
-function remap(hand) {
+function addStrength(allHands, isPartTwo = false) {
+  if (isPartTwo) {
+    allHands.map(hand => {
+      if (hand.cards === 'JJJJJ') return hand.strength = 7
+      const replacement = mostFrequentNonJ(hand.cards)
+      return hand.strength = strength(hand.cards.replaceAll('J', replacement))
+      
+    })
+  } else {
+    allHands.map(hand => hand.strength = strength(hand.cards))
+  } 
+}
+
+function remap(hand, isPartTwo = false) {
   const mapping = {'2':'a','3':'b','4':'c','5':'d','6':'e','7':'f','8':'g','9':'h','T':'j','J':'k','Q':'l','K':'m','A':'n'}
+  if (isPartTwo) mapping['J'] = 'A'
   const cards = hand.split('')
   const _cards = cards.map(card => card = mapping[card])
   return _cards.join('')
 }
 
-function revalue() {
-  hands.map(hand => {
-    hand.cards = remap(hand.cards)
+function revalue(allHands, isPartTwo) {
+  allHands.map(hand => {
+    hand.cards = isPartTwo ? remap(hand.cards, true) : remap(hand.cards)
   })
 }
 
-addStrength()
-revalue()
-hands.sort((a,b) => a.strength - b.strength > 0 ? 1 : -1)
-hands.sort((a,b) => {
-  if (a.strength === b.strength) return a.cards > b.cards ? 1 : -1
-  return 0
-})
+function sort(allHands) {
+  allHands
+    .sort((a,b) => a.strength - b.strength > 0 ? 1 : -1)
+    .sort((a,b) => {
+      if (a.strength === b.strength) return a.cards > b.cards ? 1 : -1
+      return 0
+    })
+}
+
+// PART ONE processing
+addStrength(hands)
+revalue(hands)
+sort(hands)
 
 let winnings = 0
 hands.forEach((hand, index) => winnings += (parseInt(hand.bid) * (index + 1)))
 
-console.log(winnings) // 248179786
+console.log('Part One', winnings) // 248179786
+
+// PART TWO processing
+const partTwoHands = lines.map(line => {
+  const obj = {}
+  obj.cards = line.split(' ')[0]
+  obj.bid = line.split(' ')[1]
+  return obj
+})
+
+addStrength(partTwoHands, true)
+revalue(partTwoHands, true)
+sort(partTwoHands)
+
+winnings = 0
+partTwoHands.forEach((hand, index) => winnings += (parseInt(hand.bid) * (index + 1)))
+
+console.log('Part Two', winnings) // 247885995
