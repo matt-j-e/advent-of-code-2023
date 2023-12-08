@@ -10,9 +10,6 @@ const nodes = lines.slice(2).map(node => {
   return {label, L, R}
 })
 
-// console.log(directions)
-// console.log(nodes)
-
 let currentNode = 'AAA'
 let steps = 0
 while (currentNode !== 'ZZZ') {
@@ -23,3 +20,25 @@ while (currentNode !== 'ZZZ') {
 }
 
 console.log('Part One', steps) // 19667
+
+const currentNodes = nodes.filter(node => node.label.endsWith('A'))
+const zSteps = currentNodes.map(currentNode => {
+  let step = 0
+  while(!currentNode.label.endsWith('Z')) {
+    const direction = directions[step % directions.length]
+    currentNode = nodes.find(node => node.label === currentNode[direction])
+    step++
+  }
+  return step
+})
+
+// Greatest Common Divisor (Euclidian algorithm)
+function gcd(a, b) {
+  return a ? gcd(b % a, a) : b
+}
+// Lowest Common Multiple
+function lcm(a, b) {
+  return a * b / gcd(a, b)
+}
+
+console.log('Part Two:', zSteps.reduce(lcm)) // 19185263738117
