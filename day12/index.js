@@ -50,3 +50,15 @@ rows.forEach(row => {
   sumOfCounts += count
 })
 console.log('Part One:', sumOfCounts) // 7857
+
+sumOfCounts = 0
+
+rows.forEach(row => {
+  let count = 0
+  const strings = allPossibleStrings(row.springs + '?' + row.springs + '?' + row.springs + '?' + row.springs + '?' + row.springs)
+  strings.forEach(string => {
+    if (string.search(new RegExp(createRegex(row.config + ',' + row.config + ',' + row.config + ',' + row.config + ',' + row.config))) !== -1) count++
+  })
+  sumOfCounts += count
+})
+console.log('Part Two:', sumOfCounts)
