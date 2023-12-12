@@ -12,13 +12,13 @@ console.log(rows)
 
 function createRegex(config) {
   const chunks = config.split(',')
-  let re = '/^'
+  let re = '^'
   chunks.forEach((chunk, i) => {
     re += i === 0 ? '\\.*' : '\\.+' 
     re += '#'.repeat(chunk)
     re += '\\.*'
   })
-  re += '$/'
+  re += '$'
   return re
 }
 
