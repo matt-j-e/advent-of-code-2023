@@ -52,9 +52,29 @@ function viewMatrix(matrix) {
   }
 }
 
+/**
+ * Generates a deep copy of a multi-dimensional array
+ * (it will also copy a flat array but there are many simpler
+ * ways to do that!)
+ * @param {*} arr is the array to be copied
+ * @returns a copy of the array
+ */
+function deepCopy(arr) {
+  let result = []
+  arr.forEach(elem => {
+    if(Array.isArray(elem)) {
+      result.push(deepCopy(elem))
+    } else {
+      result.push(elem)
+    }
+  })
+  return result
+}
+
 module.exports = { 
 	create2DArrayOfChar,
 	loadData,
-  viewMatrix
+  viewMatrix,
+  deepCopy
 };
 

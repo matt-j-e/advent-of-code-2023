@@ -1,6 +1,6 @@
 const helpers = require('../helpers/helperFunctions');
 
-const matrix = helpers.loadData(__dirname.split('/').pop(), true).map(line => line.split(''))
+let matrix = helpers.loadData(__dirname.split('/').pop(), false).map(line => line.split(''))
 // helpers.viewMatrix(matrix)
 
 function findNorthernmostDot(coords) {
@@ -26,7 +26,6 @@ function findEasternmostDot(coords) {
   }
   return {r: coords.r, c: targetC}
 }
-// console.log(findEasternmostDot({r:1,c:2}))
 
 function findSouthernmostDot(coords) {
   let targetR = coords.r
@@ -51,7 +50,6 @@ function findWesternmostDot(coords) {
   }
   return {r: coords.r, c: targetC}
 }
-// console.log(findWesternmostDot({r:9,c:2}))
 
 function roll(current, dir) {
   let target
@@ -76,25 +74,93 @@ function roll(current, dir) {
   matrix[current.r][current.c] = '.'
 }
 
-for (let r = 1; r < matrix.length; r++) {
-  for (let c = 0; c < matrix[0].length; c++) {
-    if (matrix[r][c] === 'O') roll({r, c})
+function tilt(dir = 'n') {
+  if (dir === 'n') {
+    for (let r = 1; r < matrix.length; r++) {
+      for (let c = 0; c < matrix[0].length; c++) {
+        if (matrix[r][c] === 'O') roll({r, c}, dir)
+      }
+    }
+  } else if (dir === 'w') {
+    for (let r = 0; r < matrix.length; r++) {
+      for (let c = 0; c < matrix[0].length; c++) {
+        if (matrix[r][c] === 'O') roll({r, c}, dir)
+      }
+    }
+  } else if (dir === 's') {
+    for (let r = matrix.length - 2; r >= 0; r--) {
+      for (let c = 0; c < matrix[0].length; c++) {
+        if (matrix[r][c] === 'O') roll({r, c}, dir)
+      }
+    }
+  } else {
+    for (let r = 0; r < matrix.length; r++) {
+      for (let c = matrix[0].length - 1; c >= 0; c--) {
+        if (matrix[r][c] === 'O') roll({r, c}, dir)
+      }
+    } 
   }
 }
 
-let totalLoad = 0
-let row = 0
-while (row < matrix.length) {
-  const multiplier = matrix.length - row
-  const rowLoad = matrix[row].reduce((tot, char) => {
-    if (char === 'O') {
-      return tot + 1
-    } else {
-      return tot
-    }
-  },0)
-  totalLoad += (rowLoad * multiplier)
-  row++
+function calcLoad() {
+  let result = 0
+  let row = 0
+  while (row < matrix.length) {
+    const multiplier = matrix.length - row
+    const rowLoad = matrix[row].reduce((tot, char) => {
+      if (char === 'O') {
+        return tot + 1
+      } else {
+        return tot
+      }
+    },0)
+    result += (rowLoad * multiplier)
+    row++
+  }
+  return result
 }
 
-console.log('Part One:', totalLoad) // 107142
+function arrayToString(arr) {
+  return arr.map(elem => elem.join('')).join('')
+}
+
+// tilt() // commented out to avoid impacting Part 2
+console.log('Part One:', calcLoad()) // 107142
+
+const cache = new Map()
+const instances = {}
+
+let cycle = 0
+/**
+ * Identified (by observing logged output) that the matrix output from a cycle
+ * repeats every 22 cycles after 265 cycles have been completed.
+ * So we can calculate which cycle will generate the same load as the billionth
+ * using this formula:
+ * (1 billion - 265) % 22 + 265
+ */
+const repeatStart = 265
+const repeatLength = 22
+const limit = (1_000_000_000 - repeatStart) % repeatLength + repeatStart
+while (cycle < limit) {
+  let matrixStr = arrayToString(matrix)
+  if (cache.has(matrixStr)) {
+    matrix = helpers.deepCopy(cache.get(matrixStr))
+    instances[matrixStr]++
+  } else {
+    // console.log(cycle)
+    tilt('n')
+    tilt('w')
+    tilt('s')
+    tilt('e')
+    cache.set(matrixStr, helpers.deepCopy(matrix))
+    instances[matrixStr] = 1
+  }
+  // const load = calcLoad(matrix)
+  // if (load === 104715) console.log(cycle, load)
+  cycle++
+}
+// console.log(instances)
+// console.log(Object.values(instances))
+// Object.values(instances).forEach((val, i) => console.log(i, val))
+
+console.log('Part Two:', calcLoad(matrix)) // 104815
