@@ -53,8 +53,24 @@ function findWesternmostDot(coords) {
 }
 // console.log(findWesternmostDot({r:9,c:2}))
 
-function roll(current) {
-  const target = findNorthernmostDot(current)
+function roll(current, dir) {
+  let target
+  switch(dir) {
+    case 'n':
+      target = findNorthernmostDot(current)
+      break
+    case 'e':
+      target = findEasternmostDot(current)
+      break
+    case 's':
+      target = findSouthernmostDot(current)
+      break
+    case 'w':
+      target = findWesternmostDot(current)
+      break
+    default:
+      target = findNorthernmostDot(current)
+  }
   if (target.r === current.r && target.c === current.c) return
   matrix[target.r][target.c] = matrix[current.r][current.c]
   matrix[current.r][current.c] = '.'
