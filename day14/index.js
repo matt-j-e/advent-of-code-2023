@@ -1,6 +1,6 @@
 const helpers = require('../helpers/helperFunctions');
 
-const matrix = helpers.loadData(__dirname.split('/').pop(), false).map(line => line.split(''))
+const matrix = helpers.loadData(__dirname.split('/').pop(), true).map(line => line.split(''))
 // helpers.viewMatrix(matrix)
 
 function findNorthernmostDot(coords) {
@@ -14,6 +14,44 @@ function findNorthernmostDot(coords) {
   }
   return {r: targetR, c: coords.c}
 }
+
+function findEasternmostDot(coords) {
+  let targetC = coords.c
+  for (let c = coords.c + 1; c < matrix[0].length; c++) {
+    if (matrix[coords.r][c] === '.') {
+      targetC = c
+    } else {
+      break
+    }
+  }
+  return {r: coords.r, c: targetC}
+}
+// console.log(findEasternmostDot({r:1,c:2}))
+
+function findSouthernmostDot(coords) {
+  let targetR = coords.r
+  for (let r = coords.r + 1; r < matrix.length; r++) {
+    if (matrix[r][coords.c] === '.') {
+      targetR = r
+    } else {
+      break
+    }
+  }
+  return {r: targetR, c: coords.c}
+}
+
+function findWesternmostDot(coords) {
+  let targetC = coords.c
+  for (let c = coords.c - 1; c >= 0; c--) {
+    if (matrix[coords.r][c] === '.') {
+      targetC = c
+    } else {
+      break
+    }
+  }
+  return {r: coords.r, c: targetC}
+}
+// console.log(findWesternmostDot({r:9,c:2}))
 
 function roll(current) {
   const target = findNorthernmostDot(current)
