@@ -39,8 +39,22 @@ function loadData(dir, test = false) {
   }
 }
 
+/**
+ * Prints out a 2D array with each row converted to a string.
+ * Useful for visualising a 2D array of single chars
+ * @param matrix A 2D array
+ * @returns nothing - it just console.logs the array
+ */
+function viewMatrix(matrix) {
+  console.log('\n')
+  for (line of matrix) {
+    console.log(line.join(''))
+  }
+}
+
 module.exports = { 
 	create2DArrayOfChar,
 	loadData,
+  viewMatrix
 };
 
