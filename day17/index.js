@@ -1,69 +1,65 @@
+const heapq = require('heapq')
+
 const helpers = require('../helpers/helperFunctions');
+const lines = helpers.loadData(__dirname.split('/').pop(), false)
+const grid = new Map()
+for (let r = 0; r < lines.length; r++) {
+  lines[r].split('').forEach((v, c) => grid.set(`${r},${c}`, parseInt(v)))
+}
+const height = lines.length
+const width = lines[0].trim().length
+const queue = []
+const cmp = (x, y) => x[0] < y[0]
+heapq.push(queue, [0,0,0,0,0,0], cmp)
+const seen = new Set()
 
-const lines = helpers.loadData(__dirname.split('/').pop(), true)
-const matrix = lines.map(line => line.split(""));
-// console.log(matrix)
-const maxR = matrix.length;
-const maxC = matrix[0].length;
-const graph = new Map();
-const costs = new Map();
-const parents = new Map();
+let totalHeat
 
-for (let r = 0; r < maxR; r++) {
-  for (let c = 0; c < maxC; c++) {
-    graph.set(`${r},${c}`, new Map());
-    costs.set(`${r},${c}`, Number.POSITIVE_INFINITY);
-    parents.set(`${r},${c}`, null);
-    if (r === maxR - 1 && c === maxC - 1) continue;
-    if (r > 0) {
-      graph.get(`${r},${c}`).set(`${r - 1},${c}`, parseInt(matrix[r - 1][c]));
+while (queue.length > 0) {
+  const [heat, r, c, dr, dc, s] = heapq.pop(queue, cmp)
+
+  if (seen.has([r, c, dr, dc, s].toString())) continue
+
+  if (r === height - 1 && c === width - 1) {
+    totalHeat = heat
+    break
+  }
+
+  seen.add([r, c, dr, dc, s].toString())
+
+  for (const [nextDr, nextDc] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    const nextR = r + nextDr
+    const nextC = c + nextDc
+    if (nextR < 0 || nextR >= height || nextC < 0 || nextC >= width) {
+      continue // outside the grid
     }
-    if (c > 0) {
-      graph.get(`${r},${c}`).set(`${r},${c - 1}`, parseInt(matrix[r][c - 1]));
+    if (nextDr === -dr && nextDc === -dc) {
+      continue // back steps not allowed
     }
-    if (r < maxR - 1) {
-      graph.get(`${r},${c}`).set(`${r + 1},${c}`, parseInt(matrix[r + 1][c]));
-    }
-    if (c < maxC - 1) {
-      graph.get(`${r},${c}`).set(`${r},${c + 1}`, parseInt(matrix[r][c + 1]));
+    if (nextDr === dr && nextDc === dc) {
+      if (s < 3) {
+        heapq.push(queue, [
+          heat + grid.get(nextR + ',' + nextC),
+          nextR,
+          nextC,
+          nextDr,
+          nextDc,
+          s + 1
+        ], cmp)
+      } else {
+        continue
+      }
+    } else {
+      heapq.push(queue, [
+        heat + grid.get(nextR + ',' + nextC),
+        nextR,
+        nextC,
+        nextDr,
+        nextDc,
+        1
+      ], cmp)
     }
   }
 }
 
-graph.get("0,0").forEach((value, node) => {
-  costs.set(node, value);
-  parents.set(node, "0,0");
-});
-
-// keep track of processed nodes
-const processed = [];
-
-function findLowestCostNode(costs) {
-  let lowestCost = Number.POSITIVE_INFINITY;
-  let lowestCostNode = null;
-  costs.forEach((cost, node) => {
-    if (cost < lowestCost && !processed.includes(node)) {
-      lowestCost = cost;
-      lowestCostNode = node;
-    }
-  });
-  return lowestCostNode;
-}
-
-let node = findLowestCostNode(costs);
-while (node) {
-  console.log(node);
-  const nodeCost = costs.get(node);
-  const neighbours = graph.get(node);
-  neighbours.forEach((cost, neighbour) => {
-    const newNodeCost = nodeCost + cost;
-    if (costs.get(neighbour) > newNodeCost) {
-      costs.set(neighbour, newNodeCost);
-      parents.set(neighbour, node);
-    }
-  });
-  processed.push(node);
-  node = findLowestCostNode(costs);
-}
-
-console.log("Part One:", costs.get(`${maxR-1},${maxC-1}`));
+console.log('Part One:', totalHeat) // 786 too high, 785 = correct
