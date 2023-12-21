@@ -39,8 +39,6 @@ modules.forEach((v, k) => {
   })
 })
 
-// console.log(modules)
-
 let combinedLow = 0
 let combinedHigh = 0
 
@@ -51,10 +49,8 @@ for (let i = 0; i < 1000; i++) {
   while(queue.length > 0) {
     let [moduleName, pulseType] = queue.shift()
     const moduleConfig = modules.get(moduleName)
-    // console.log(moduleConfig)
     for (recipient of moduleConfig.recipients) {
       const recipientConfig = modules.get(recipient)
-      // console.log(moduleName, pulseType, recipient)
       if (pulseType === 0) {
         low += 1
       } else {
