@@ -50,3 +50,19 @@ function internalArea(points) {
  * - plus 1
  */
 console.log('Part One:', internalArea(points) + (perimeter(points) / 2) + 1) // 53844
+
+const points2 = [[0,0]]
+const dirsMap = {'0':'R', '1':'D', '2':'L', '3':'U'}
+
+r = 0
+c = 0
+for (const line of lines) {
+  const [,,hex] = line.split(' ')
+  const num = hex.substring(2,7)
+  const [newR, newC] = moveMap.get(dirsMap[hex[7]])
+  r += newR * parseInt(num, 16)
+  c += newC * parseInt(num, 16)
+  points2.push([r,c])
+}
+
+console.log('Part Two:', internalArea(points2) + (perimeter(points2) / 2) + 1) // 42708339569950
