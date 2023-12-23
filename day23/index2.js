@@ -1,7 +1,15 @@
 const helpers = require('../helpers/helperFunctions');
 
-const lines = helpers.loadData(__dirname.split('/').pop(), false)
-// console.log(lines)
+let lines = helpers.loadData(__dirname.split('/').pop(), false)
+console.log(lines)
+lines = lines.map(line => {
+  line = line.replaceAll('<','.')
+    .replaceAll('>','.')
+    .replaceAll('^','.')
+    .replaceAll('v','.')
+  return line
+})
+console.log(lines)
 
 const grid = new Map()
 for (let r = 0; r < lines.length; r++) {
