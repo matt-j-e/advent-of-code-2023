@@ -65,8 +65,8 @@ for (let i = 0; i < paths.length; i++) {
     } else if (moves.length === 1) {
       path.push(moves[0])
     } else {
-      paths.splice(i, 1)
-      break
+      lastStep = end
+      continue
     }
     lastStep = path[path.length - 1]
   }
