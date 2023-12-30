@@ -1,6 +1,6 @@
 const helpers = require('../helpers/helperFunctions');
 
-const lines = helpers.loadData(__dirname.split('/').pop(), true)
+const lines = helpers.loadData(__dirname.split('/').pop(), false)
 lines.sort((a, b) => {
   const ac = a.split('~')[0]
   const az = ac.split(',')[2]
@@ -8,7 +8,7 @@ lines.sort((a, b) => {
   const bz = bc.split(',')[2]
   return parseInt(az) > parseInt(bz) ? 1 : -1
 })
-console.log(lines)
+// console.log(lines)
 
 class Brick {
   constructor(line) {
@@ -41,14 +41,90 @@ class Brick {
       }
       this.coords.push(coord)
     }
+    this.supports = new Set()
+    this.isSupportedBy = new Set()
   }
 
   _print() {
-    return this.coords
+    // return [this.coords, this.supports, this.isSupportedBy]
+    return `${this.coords} | Supports: ${this.supports.size} | SupportedBy: ${this.isSupportedBy.size}`
+  }
+
+  decreaseZsBy1() {
+    this.coords.forEach(coord => coord[2] -= 1)
   }
 }
 
+function canMoveDownOne(i) {
+  const thisLayer = helpers.deepCopy(bricks[i].coords)
+  if (thisLayer[0][2] === 1) return false
+  const newZ = thisLayer[0][2] - 1
+  for (let j = i - 1; j >= 0; j--) {
+    const below = bricks[j].coords.map(coord => coord.join())
+    let matching = false
+    for (let a = 0; a < thisLayer.length; a++) {
+      thisLayer[a][2] = newZ
+      for (let b = 0; b < below.length; b++) {
+        if (thisLayer[a].join() === below[b]) return false
+      }
+    }
+  }
+  return true
+}
+
+/**
+ * Instantiate the brick objects
+ */
 const bricks = lines.map(line => new Brick(line))
 
-bricks.forEach(brick => console.log(brick._print()))
+// bricks.forEach(brick => console.log('BEFORE MOVING', brick._print()))
 
+/**
+ * Let the bricks fall
+ */
+let i = 1
+while (i < bricks.length) {
+  if (canMoveDownOne(i)) {
+    if (i % 100 === 0) console.log(i, 'MOVING')
+    bricks[i].decreaseZsBy1()
+    // bricks.forEach(brick => console.log(brick._print()))
+  }
+  if (!canMoveDownOne(i)) {
+    i++
+  }
+}
+
+bricks.sort((a, b) => a.coords[0][2] > b.coords[0][2] ? 1 : -1)
+// bricks.forEach(brick => console.log('AFTER SORTING', brick._print()))
+
+/**
+ * Add isSupportedBy & supports properties
+ */
+for (let i = 1; i < bricks.length; i++) {
+  const thisLayer = bricks[i].coords
+  for (let j = i - 1; j >= 0; j--) {
+    const below = bricks[j].coords
+    for (let a = 0; a < thisLayer.length; a++) {
+      for (let b = 0; b < below.length; b++) {
+        if ((thisLayer[a][0] === below[b][0] || thisLayer[a][1] === below[b][1]) && below[b][2] === thisLayer[a][2] - 1) {
+          bricks[i].isSupportedBy.add(bricks[j])
+          bricks[j].supports.add(bricks[i])
+        }
+      }
+    }
+  }
+}
+
+// bricks.forEach(brick => console.log(brick._print()))
+
+let disintegratable = 0
+
+bricks.forEach(thisLayer => {
+  let numberWithMultipleSupports = 0
+  for (let above of thisLayer.supports) {
+    if (above.isSupportedBy.size > 1) numberWithMultipleSupports++
+  }
+  if (numberWithMultipleSupports === thisLayer.supports.size) disintegratable++
+})
+
+console.log('Part One:', disintegratable)
