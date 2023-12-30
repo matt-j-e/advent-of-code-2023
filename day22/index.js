@@ -56,12 +56,12 @@ class Brick {
 }
 
 function canMoveDownOne(i) {
+  const floor = bricks[i - 1].coords[0][2]
   const thisLayer = helpers.deepCopy(bricks[i].coords)
-  if (thisLayer[0][2] === 1) return false
+  if (thisLayer[0][2] === floor) return false
   const newZ = thisLayer[0][2] - 1
   for (let j = i - 1; j >= 0; j--) {
     const below = bricks[j].coords.map(coord => coord.join())
-    let matching = false
     for (let a = 0; a < thisLayer.length; a++) {
       thisLayer[a][2] = newZ
       for (let b = 0; b < below.length; b++) {
@@ -106,7 +106,8 @@ for (let i = 1; i < bricks.length; i++) {
     const below = bricks[j].coords
     for (let a = 0; a < thisLayer.length; a++) {
       for (let b = 0; b < below.length; b++) {
-        if ((thisLayer[a][0] === below[b][0] || thisLayer[a][1] === below[b][1]) && below[b][2] === thisLayer[a][2] - 1) {
+        if (below[b][2] !== thisLayer[a][2] - 1) continue
+        if (thisLayer[a][0] === below[b][0] || thisLayer[a][1] === below[b][1]) {
           bricks[i].isSupportedBy.add(bricks[j])
           bricks[j].supports.add(bricks[i])
         }
@@ -119,12 +120,24 @@ for (let i = 1; i < bricks.length; i++) {
 
 let disintegratable = 0
 
+// bricks.forEach((thisLayer) => {
+//   if (
+//     thisLayer.supports.size > 0 && 
+//     Array.from([...thisLayer.supports]).every(supportedBrick => supportedBrick.isSupportedBy.size > 1)
+//     ) disintegratable++
+// })
+
+function allSupportedByMoreThanOne(collection) {
+  if (collection.size === 0) return false
+  let result = true
+  Array.from([...collection]).forEach(item => {
+    if (item.isSupportedBy.size < 2) result = false
+  })
+  return result
+}
+
 bricks.forEach(thisLayer => {
-  let numberWithMultipleSupports = 0
-  for (let above of thisLayer.supports) {
-    if (above.isSupportedBy.size > 1) numberWithMultipleSupports++
-  }
-  if (numberWithMultipleSupports === thisLayer.supports.size) disintegratable++
+  if (allSupportedByMoreThanOne(thisLayer.supports)) disintegratable++
 })
 
 console.log('Part One:', disintegratable)
